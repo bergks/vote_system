@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<h1 class="display-4">Система голосования</h1>
+<p class="lead">Добро пожаловать в веб-версию приложения.</p>
+<a href="{% url 'votes:poll_list' %}" class="btn btn-primary">Перейти к голосованиям</a>
+{% endblock %}

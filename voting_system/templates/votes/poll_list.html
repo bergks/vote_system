@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Список голосований
+{% endblock %}
+
+{% block content %}
+  <h1>Все голосования</h1>
+  <p>Всего голосований: {{ polls|length }}</p>
+  <ul class="list-group">
+    {% for poll in polls %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <!-- Обратите внимание: poll.question, а не poll.title -->
+        <a href="{% url 'votes:poll_detail' poll.id %}">{{ poll.question }}</a>
+
+        {% if poll.is_active %}
+          <span class="badge bg-success rounded-pill">Активно</span>
+        {% else %}
+          <span class="badge bg-secondary rounded-pill">Завершено</span>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li class="list-group-item">Пока нет ни одного голосования.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
