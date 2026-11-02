@@ -1,48 +1,166 @@
+import sqlite3
 from django.shortcuts import render
-from storage import load_polls, load_votes
-from voting_logic import get_poll_results
+
+# Путь к нашей новой базе данных
+DB_PATH = "data/voting.sqlite"
+
+
+def get_db_connection():
+    """Вспомогательная функция для подключения к БД."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
 
 def poll_list(request):
-    polls_dict = load_polls("data/polls.json")
-    polls_list = []
-    for poll_id, poll_data in polls_dict.items():
-        poll_data['id'] = int(poll_id) 
-        polls_list.append(poll_data)
-    return render(request, "votes/poll_list.html", {"polls": polls_list})
+    """Страница со списком всех голосований, поиском и фильтрацией."""
+    search_query = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', 'all')
+    
+    conn = get_db_connection()
+    
+    # Вариант 1: Есть и поиск, и фильтр по статусу
+    if search_query and status_filter == 'active':
+        polls = conn.execute(
+            """
+            SELECT id, question, is_active, created_at
+            FROM polls
+            WHERE question
+            LIKE ? AND is_active = 1
+            ORDER BY id DESC
+            """,
+            (f"%{search_query}%",)
+        ).fetchall()
+
+    elif search_query and status_filter == 'finished':
+        polls = conn.execute(
+            """
+            SELECT id, question, is_active, created_at
+            FROM polls
+            WHERE question
+            LIKE ? AND is_active = 0
+            ORDER BY id DESC
+            """,
+            (f"%{search_query}%",)
+        ).fetchall()
+        
+    elif search_query:
+        polls = conn.execute(
+            """
+            SELECT id, question, is_active, created_at
+            FROM polls
+            WHERE question
+            LIKE ?
+            ORDER BY id DESC
+            """,
+            (f"%{search_query}%",)
+        ).fetchall()
+        
+    elif status_filter == 'active':
+        polls = conn.execute(
+            """
+            SELECT id, question, is_active, created_at
+            FROM polls
+            WHERE is_active = 1
+            ORDER BY id DESC
+            """
+        ).fetchall()
+
+    elif status_filter == 'finished':
+        polls = conn.execute(
+            """
+            SELECT id, question, is_active, created_at
+            FROM polls
+            WHERE is_active = 0
+            ORDER BY id DESC
+            """
+        ).fetchall()
+
+    else:
+        polls = conn.execute(
+            """
+            SELECT id, question, is_active, created_at
+            FROM polls
+            ORDER BY id DESC
+            """
+        ).fetchall()
+        
+    conn.close()
+    
+    return render(request, "votes/poll_list.html", {
+        "polls": polls,
+        "search_query": search_query,
+        "current_status": status_filter,
+    })
+
 
 def poll_detail(request, poll_id):
-    polls_dict = load_polls("data/polls.json")
-    current_poll = polls_dict.get(str(poll_id))
-    
-    # Если голосование не найдено, мы НЕ вызываем get_poll_results, 
-    # а сразу идем в шаблон, передавая poll=None
-    if current_poll is None:
-        return render(
-            request, 
-            "votes/poll_detail.html", 
-            {"poll": None}, 
-            status=404
-        )
+    """Страница с конкретным голосованием и результатами."""
+    conn = get_db_connection()
+    poll = conn.execute("SELECT id, question, is_active, created_at \
+                        FROM polls WHERE id = ?",
+                        (poll_id,)).fetchone()
+    if poll is None:
+        conn.close()
+        return render(request, "votes/poll_detail.html",
+                      {"poll": None}, status=404)
 
-    # Если голосование найдено, считаем результаты
-    votes = load_votes("data/votes.json")
-    results_dict = get_poll_results(polls_dict, votes, int(poll_id))
+    # получаем варианты и количество голосов
+    choices_data = conn.execute("""
+        SELECT choices.choice_text, COUNT(votes.id) AS votes_count
+        FROM choices
+        LEFT JOIN votes ON choices.id = votes.choice_id
+        WHERE choices.poll_id = ?
+        GROUP BY choices.id
+    """, (poll_id,)).fetchall()
     
-    choices_with_results = []
-    if results_dict:
-        for choice_name, count in results_dict.items():
-            choices_with_results.append({"name": choice_name, "count": count})
-    else:
-        for choice_id, choice_name in current_poll["choices"].items():
-            choices_with_results.append({"name": choice_name, "count": 0})
-
-    # Передаем данные в шаблон, статус 200
+    conn.close()
+    
     return render(
         request,
         "votes/poll_detail.html",
         {
-            "poll": current_poll,
-            "choices_data": choices_with_results,
+            "poll": poll,
+            "choices_data": choices_data,
         },
         status=200
     )
+
+
+def statistics(request):
+    conn = get_db_connection()
+    
+    total_polls = conn.execute("SELECT COUNT(*) AS count FROM polls").fetchone()['count']
+    total_votes = conn.execute("SELECT COUNT(*) AS count FROM votes").fetchone()['count']
+    
+    stats = conn.execute("""
+        SELECT polls.question, COUNT(votes.id) AS votes_count
+        FROM polls
+        LEFT JOIN votes ON polls.id = votes.poll_id
+        GROUP BY polls.id
+        ORDER BY votes_count DESC
+    """).fetchall()
+    
+    recent_votes = conn.execute("""
+        SELECT users.username, polls.question,
+               choices.choice_text, votes.voted_at
+        FROM votes
+        JOIN users ON votes.user_id = users.id
+        JOIN polls ON votes.poll_id = polls.id
+        JOIN choices ON votes.choice_id = choices.id
+        ORDER BY votes.voted_at DESC
+        LIMIT 5
+    """).fetchall()
+
+    conn.close()
+    
+    return render(request, "votes/statistics.html", {
+        "total_polls": total_polls,
+        "total_votes": total_votes,
+        "stats": stats,
+        "recent_votes": recent_votes
+    })
+
+
+def page_not_found(request, exception):
+    return render(request, "pages/404.html", status=404)

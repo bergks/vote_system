@@ -1,42 +1,41 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {% if poll %}{{ poll.question }}{% else %}Голосование не найдено{% endif %}
+  {% if poll %}
+    {{ poll.question }}
+  {% else %}
+    Голосование не найдено
+  {% endif %}
 {% endblock %}
 
 {% block content %}
-    {% if poll %}
-        <!-- Если голосование найдено, показываем карточку -->
-        <div class="card mt-4">
-            <div class="card-header">
-                Голосование #{{ poll.id }}
-            </div>
-            <div class="card-body">
-                <h3 class="card-title">{{ poll.question }}</h3>
-                
-                <hr>
-                <h5>Варианты ответа и результаты:</h5>
-                <ul class="list-group mb-3">
-                    {% for item in choices_data %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ item.name }}
-                            <span class="badge bg-primary rounded-pill">{{ item.count }} голосов</span>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">Нет вариантов ответа.</li>
-                    {% endfor %}
-                </ul>
+  {% if poll %}
+    <div class="card mt-4">
+      <div class="card-header">Голосование #{{ poll.id }}</div>
+      <div class="card-body">
+        <h3 class="card-title">{{ poll.question }}</h3>
 
-                <!-- Обратите внимание на namespace 'votes:' -->
-                <a href="{% url 'votes:poll_list' %}" class="btn btn-outline-secondary">← Назад к списку</a>
-            </div>
-        </div>
-    {% else %}
-        <!-- Если голосование не найдено (poll = None) -->
-        <div class="alert alert-danger mt-4">
-            <h1 class="text-danger">Голосование не найдено</h1>
-            <p>Голосования с указанным идентификатором не существует.</p>
-            <a href="{% url 'votes:poll_list' %}" class="btn btn-primary">← Вернуться к списку голосований</a>
-        </div>
-    {% endif %}
+        <hr />
+        <h5>Варианты ответа и результаты:</h5>
+        <ul class="list-group mb-3">
+          {% for item in choices_data %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ item.choice_text }}
+              <span class="badge bg-primary rounded-pill">{{ item.votes_count }} голосов</span> <!-- Изменили count на votes_count -->
+            </li>
+          {% empty %}
+            <li class="list-group-item">Нет вариантов ответа.</li>
+          {% endfor %}
+        </ul>
+
+        <a href="{% url 'votes:poll_list' %}" class="btn btn-outline-secondary">← Назад к списку</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-danger mt-4">
+      <h1 class="text-danger">Голосование не найдено</h1>
+      <p>Голосования с указанным идентификатором не существует.</p>
+      <a href="{% url 'votes:poll_list' %}" class="btn btn-primary">← Вернуться к списку голосований</a>
+    </div>
+  {% endif %}
 {% endblock %}

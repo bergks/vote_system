@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика{% endblock %}
+
+{% block content %}
+<h1>Общая статистика</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Всего голосований</h5>
+                <p class="display-6">{{ total_polls }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Всего отдано голосов</h5>
+                <p class="display-6">{{ total_votes }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Активность по голосованиям</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Вопрос</th>
+            <th>Количество голосов</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in stats %}
+        <tr>
+            <td>{{ item.question }}</td>
+            <td>{{ item.votes_count }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">Статистики пока нет.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3 class="mt-5">Последние отданные голоса</h3>
+<table class="table table-sm table-hover">
+    <thead>
+        <tr>
+            <th>Пользователь</th>
+            <th>Голосование</th>
+            <th>Ответ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vote in recent_votes %}
+        <tr>
+            <td>{{ vote.username }}</td>
+            <td>{{ vote.question }}</td>
+            <td><span class="badge bg-success">{{ vote.choice_text }}</span></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">Голосов пока нет.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'votes:poll_list' %}" class="btn btn-outline-secondary">← К списку голосований</a>
+{% endblock %}

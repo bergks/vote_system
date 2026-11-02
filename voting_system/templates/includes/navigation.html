@@ -1,4 +1,9 @@
-<nav class="nav mb-4 bg-light p-3 shadow-sm">
+{%load static%}
+
+<nav class="nav mb-4 p-3 shadow-sm align-items-center">
+  
+
   <a class="nav-link" href="{% url 'pages:index' %}">Главная</a>
   <a class="nav-link" href="{% url 'votes:poll_list' %}">Голосования</a>
+  <a class="nav-link" href="{% url 'votes:statistics' %}">Статистика</a>
 </nav>

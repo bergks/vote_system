@@ -19,7 +19,10 @@ def create_user(users: dict, username: str) -> int:
     return user_id
 
 
-def create_poll(polls: dict, author_id: int, question: str, choices: list) -> int:
+def create_poll(polls: dict,
+                author_id: int,
+                question: str,
+                choices: list) -> int:
     """Создать новое голосование.
 
     Возвращает ID нового голосования.
@@ -63,9 +66,8 @@ def get_poll_results(polls: dict, votes: list, poll_id: int) -> dict | None:
 
     # Пробегаем по всем голосам и увеличиваем счётчик
     for vote in votes:
-        # В JSON poll_id тоже может быть числом или строкой, проверяем оба варианта
         if int(vote["poll_id"]) == int(poll_id):
-            choice_id = str(vote["choice_id"]) # Приводим к строке для поиска в choices
+            choice_id = str(vote["choice_id"])
             if choice_id in poll["choices"]:
                 choice_text = poll["choices"][choice_id]
                 results[choice_text] += 1
@@ -73,7 +75,9 @@ def get_poll_results(polls: dict, votes: list, poll_id: int) -> dict | None:
     return results
 
 
-def cast_vote(votes: list, polls: dict, user_id: int, poll_id: int, choice_id: int) -> bool:
+def cast_vote(votes: list, polls: dict,
+              user_id: int, poll_id: int,
+              choice_id: int) -> bool:
     """Отдать голос за вариант.
 
     Возвращает True, если голос принят, иначе False.

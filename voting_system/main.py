@@ -128,7 +128,7 @@ def main():
                 save_data(VOTES_FILE, votes)
                 print("Голос принят!")
             else:
-                print("Не удалось проголосовать (уже голосовали или неверный вариант).")
+                print("Не удалось проголосовать).")
 
         elif choice == 4:
             show_results(polls, votes)

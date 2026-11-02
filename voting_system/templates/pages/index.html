@@ -5,5 +5,24 @@
 {% block content %}
 <h1 class="display-4">Система голосования</h1>
 <p class="lead">Добро пожаловать в веб-версию приложения.</p>
-<a href="{% url 'votes:poll_list' %}" class="btn btn-primary">Перейти к голосованиям</a>
+<a href="{% url 'votes:poll_list' %}" class="btn btn-primary mb-4">Перейти ко всем голосованиям</a>
+
+<!-- Блок с самым популярным голосованием -->
+{% if top_poll and top_poll.total_votes > 0 %}
+    <div class="card border-success mt-4">
+        <div class="card-header bg-success text-white">
+            Самое популярное голосование
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ top_poll.question }}</h5>
+            <p class="card-text text-muted">Всего отдано голосов: <strong>{{ top_poll.total_votes }}</strong></p>
+            <a href="{% url 'votes:poll_detail' top_poll.id %}" class="btn btn-outline-success">Перейти к голосованию</a>
+        </div>
+    </div>
+{% else %}
+    <!-- Если голосов еще нет вообще -->
+    <div class="alert alert-info mt-4">
+        Пока нет данных о популярных голосованиях. Станьте первым, кто проголосует!
+    </div>
+{% endif %}
 {% endblock %}
