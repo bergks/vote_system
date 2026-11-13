@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if candidate %}
+    {{ candidate.title }}
+  {% else %}
+    Кандидат не найден
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% if candidate %}
+    <div class="card mt-4">
+      <div class="card-body">
+        <h3 class="card-title">{{ candidate.title }} ({{ candidate.year }})</h3>
+        <hr />
+
+        <h4>Описание</h4>
+        <p>{{ candidate.description }}</p>
+
+        <h4>Режиссёр</h4>
+        <p>{{ candidate.director }}</p>
+        <hr />
+
+        <h5>Жанры:</h5>
+        <ul class="list-group mb-3">
+          {% for cat in candidate.category.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ cat.title }}
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Жанры не указаны</li>
+          {% endfor %}
+        </ul>
+
+        <a href="{% url 'candidates:candidates_list' %}" class="btn btn-outline-secondary">← Назад к списку</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-danger mt-4">
+      <h1 class="text-danger">Кандидат не найден</h1>
+      <p>Кандидата с указанным идентификатором не существует.</p>
+      <a href="{% url 'candidates:candidates_list' %}" class="btn btn-primary">← Вернуться к списку</a>
+    </div>
+  {% endif %}
+{% endblock %}

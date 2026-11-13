@@ -24,7 +24,7 @@ if str(BASE_DIR) not in sys.path:
 SECRET_KEY = 'django-insecure-!akjxal#%@&z!m9t7x5x#dtds+x_dzipc#_6q^)o=*fd#z+t#e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -32,6 +32,8 @@ ALLOWED_HOSTS = ['127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'candidates.apps.CandidatesConfig',
+    'user.apps.UserConfig',
     'pages.apps.PagesConfig',
     'votes.apps.VotesConfig',
     'django.contrib.admin',
@@ -60,7 +62,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': False,
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
@@ -107,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 

@@ -1,24 +1,14 @@
 import sqlite3
 from django.shortcuts import render
+from votes.models import Poll
+from django.db.models import Count
 
 DB_PATH = "data/voting.sqlite"
 
 
 def index(request):
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
 
-    # Самое популярное голосование
-    top_poll = conn.execute("""
-        SELECT polls.id, polls.question, COUNT(votes.id) AS total_votes
-        FROM polls
-        LEFT JOIN votes ON polls.id = votes.poll_id
-        GROUP BY polls.id, polls.question
-        ORDER BY total_votes DESC
-        LIMIT 1;
-    """).fetchone()
-
-    conn.close()
+    top_poll = Poll.objects.annotate(votes_count=Count('votes')).order_by('-votes_count')[0]
 
     return render(request, "pages/index.html", {"top_poll": top_poll})
 

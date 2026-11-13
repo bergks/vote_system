@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('pages.urls')),
     path('votes/', include('votes.urls')),
+    path('candidates/', include('candidates.urls'))
 ]
 
 handler404 = "pages.views.page_not_found"

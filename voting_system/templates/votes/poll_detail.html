@@ -11,16 +11,16 @@
 {% block content %}
   {% if poll %}
     <div class="card mt-4">
-      <div class="card-header">Голосование #{{ poll.id }}</div>
+      <div class="card-header">Голосование</div>
       <div class="card-body">
         <h3 class="card-title">{{ poll.question }}</h3>
-
         <hr />
+        <p>{{  poll.description  }}</p>
         <h5>Варианты ответа и результаты:</h5>
         <ul class="list-group mb-3">
           {% for item in choices_data %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              {{ item.choice_text }}
+              {{ item.title }}
               <span class="badge bg-primary rounded-pill">{{ item.votes_count }} голосов</span> <!-- Изменили count на votes_count -->
             </li>
           {% empty %}
